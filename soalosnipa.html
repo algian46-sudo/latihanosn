@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Quiz IPA Kelas 7</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #6366f1;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --text-dark: #1e293b;
+            --card-bg: #ffffff;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text-dark);
+            margin: 0; padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container { max-width: 850px; margin: 0 auto; }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            border: 1px solid #e2e8f0;
+        }
+
+        h1 { text-align: center; color: var(--primary); font-size: 2rem; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #64748b; margin-bottom: 30px; }
+
+        .identity-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+            background: #f1f5f9; padding: 20px; border-radius: 12px; margin-bottom: 30px;
+        }
+
+        .input-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.9rem; }
+        input[type="text"] {
+            width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px;
+            box-sizing: border-box; font-size: 1rem; transition: 0.3s;
+        }
+        input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+
+        .question-item { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #f1f5f9; }
+        .question-text { font-weight: 700; font-size: 1.05rem; display: block; margin-bottom: 15px; color: #334155; }
+        
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .option-card {
+            display: flex; align-items: center; padding: 12px 15px; border: 1.5px solid #e2e8f0;
+            border-radius: 10px; cursor: pointer; transition: all 0.2s ease;
+        }
+        .option-card:hover { border-color: var(--primary); background: #f5f3ff; }
+        input[type="radio"] { margin-right: 12px; width: 18px; height: 18px; accent-color: var(--primary); }
+
+        .btn {
+            background: var(--primary); color: white; border: none; padding: 16px;
+            border-radius: 12px; width: 100%; font-size: 1.1rem; font-weight: 700;
+            cursor: pointer; transition: 0.3s; margin-top: 10px;
+        }
+        .btn:hover { background: #4338ca; transform: translateY(-2px); }
+        .btn:disabled { background: #94a3b8; cursor: not-allowed; }
+
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #f8fafc; text-align: left; padding: 12px; color: #64748b; font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; }
+        td { padding: 15px 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
+        .rank { font-weight: 700; color: var(--primary); }
+        .score-badge { background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 99px; font-weight: 700; }
+
+        #result-section { display: none; text-align: center; }
+        .score-big { font-size: 4rem; font-weight: 800; color: var(--success); margin: 10px 0; }
+        
+        #loading-overlay { text-align: center; padding: 20px; color: var(--primary); font-weight: 600; }
+
+        @media (max-width: 600px) { .identity-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card" id="quiz-card">
+        <h1>Soal IPA SMP Kelas 7</h1>
+        <p class="subtitle">Besaran, Satuan, dan Pengukuran</p>
+
+        <div class="identity-grid">
+            <div class="input-group">
+                <label>Nama Lengkap</label>
+                <input type="text" id="nama" placeholder="Masukkan nama...">
+            </div>
+            <div class="input-group">
+                <label>Kelas</label>
+                <input type="text" id="kelas" placeholder="VII - ...">
+            </div>
+        </div>
+
+        <div id="quiz-container"></div>
+
+        <button class="btn" id="submit-btn" onclick="submitExam()">Kirim Semua Jawaban</button>
+    </div>
+
+    <div class="card" id="result-section">
+        <h2>Ujian Selesai!</h2>
+        <p id="student-res-info"></p>
+        <div class="score-big" id="final-score">0</div>
+        <p style="color: #64748b;">Data Anda telah tersimpan di Google Sheets.</p>
+        <button class="btn" onclick="location.reload()" style="background:#64748b;">Kerjakan Ulang</button>
+    </div>
+
+    <div class="card">
+        <h2 style="margin-top:0;">Papan Skor Live (Real-time)</h2>
+        <div id="loading-overlay">Menghubungkan ke database...</div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pos</th>
+                        <th>Nama Siswa</th>
+                        <th>Kelas</th>
+                        <th>Nilai</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyDbHDcug-AvCs7fvLyE61h5mU3BUzQpy12DPdID-uaNibolcDfyHFY8yH4scrtS8Dd/exec';
+
+    const soalData = [
+        { q: "Secara umum, besaran dibagi kedalam dua kelompok, yaitu ...", a: "Besaran pokok dan turunan", b: "Besaran turunan dan besaran murni", c: "Besaran nasional dan internasional", d: "Besaran pokok dan besaran nasional", k: "a" },
+        { q: "Dahulu, orang-orang memakai anggota tubuh mereka sebagai satuan pengukuran, seperti, kecuali ...", a: "Jari, hasta, kaki", b: "Jengkal, depa, langkah", c: "Meter, gram, liter", d: "Kaki, jengkal, langkah", k: "c" },
+        { q: "Ukuran yang bisa diukur serta mempunyai satu unit disebut dengan ukuran", a: "Biologi", b: "Kimia", c: "Fisika", d: "Matematika", k: "c" },
+        { q: "Di bawah ini yang termasuk kedalam jenis besaran pokok yaitu ....", a: "massa, kecepatan, waktu", b: "panjang, massa, waktu", c: "panjang, volume, massa", d: "suhu, panjang, berat", k: "b" },
+        { q: "Alat ukur panjang dengan tingkat ketelitian 0,01 mm yaitu ....", a: "mistar", b: "rol meter", c: "jangka sorong", d: "mikrometer sekrup", k: "d" },
+        { q: "Pengukuran adalah sebuah aktivitas membandingkan suatu besaran yang diukur menggunakan alat ukur yang nantinya akan digunakan sebagai ...", a: "besaran pokok", b: "satuan", c: "besaran turunan", d: "besaran skalar", k: "b" },
+        { q: "Sebuah meja memiliki panjang 1 meter. Satuan besaran yang dipakai dari pernyataan tersebut yaitu", a: "panjang", b: "1 meter", c: "meter", d: "meja", k: "c" },
+        { q: "Alat yang dipakai untuk mengukur suhu yaitu ....", a: "Roll Meter", b: "Termometer", c: "Barometer", d: "Neraca Pegas", k: "b" },
+        { q: "Satuan SI yang digunakan untuk menyatakan panjang yaitu", a: "depa", b: "kilogram", c: "meter", d: "kubik", k: "c" },
+        { q: "Ampere merupakan satuan SI untuk menyatakan ....", a: "Panjang", b: "Massa", c: "Waktu", d: "Kuat arus listrik", k: "d" }
+    ];
+
+    // Injek Soal ke HTML
+    const quizDiv = document.getElementById('quiz-container');
+    soalData.forEach((item, idx) => {
+        quizDiv.innerHTML += `
+            <div class="question-item">
+                <span class="question-text">${idx+1}. ${item.q}</span>
+                <div class="options-grid">
+                    <label class="option-card"><input type="radio" name="q${idx}" value="a"> A. ${item.a}</label>
+                    <label class="option-card"><input type="radio" name="q${idx}" value="b"> B. ${item.b}</label>
+                    <label class="option-card"><input type="radio" name="q${idx}" value="c"> C. ${item.c}</label>
+                    <label class="option-card"><input type="radio" name="q${idx}" value="d"> D. ${item.d}</label>
+                </div>
+            </div>
+        `;
+    });
+
+    async function loadLeaderboard() {
+        try {
+            const res = await fetch(SCRIPT_URL);
+            const data = await res.json();
+            data.sort((a, b) => b.skor - a.skor);
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = '';
+            data.forEach((row, i) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="rank">#${i + 1}</td>
+                        <td><strong>${row.nama}</strong></td>
+                        <td>${row.kelas}</td>
+                        <td><span class="score-badge">${row.skor}</span></td>
+                    </tr>
+                `;
+            });
+            document.getElementById('loading-overlay').style.display = 'none';
+        } catch (err) {
+            document.getElementById('loading-overlay').innerText = "Gagal memuat data.";
+        }
+    }
+
+    async function submitExam() {
+        const nama = document.getElementById('nama').value;
+        const kelas = document.getElementById('kelas').value;
+        const btn = document.getElementById('submit-btn');
+
+        if(!nama || !kelas) {
+            alert("⚠️ Masukkan Nama dan Kelas!");
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = "Mengirim Nilai...";
+
+        let benar = 0;
+        soalData.forEach((item, idx) => {
+            const selected = document.querySelector(`input[name="q${idx}"]:checked`);
+            if(selected && selected.value === item.k) benar++;
+        });
+
+        const skorFinal = (benar / soalData.length) * 100;
+
+        try {
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nama, kelas, skor: skorFinal })
+            });
+
+            document.getElementById('quiz-card').style.display = 'none';
+            document.getElementById('result-section').style.display = 'block';
+            document.getElementById('student-res-info').innerText = `${nama} - ${kelas}`;
+            document.getElementById('final-score').innerText = skorFinal;
+            loadLeaderboard();
+        } catch (e) {
+            alert("Error: " + e.message);
+            btn.disabled = false;
+        }
+    }
+
+    window.onload = loadLeaderboard;
+</script>
+
+</body>
+</html>

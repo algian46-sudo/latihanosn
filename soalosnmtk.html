@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Quiz Matematika Kelas 7</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #6366f1;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --text-dark: #1e293b;
+            --card-bg: #ffffff;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text-dark);
+            margin: 0; padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container { max-width: 850px; margin: 0 auto; }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            border: 1px solid #e2e8f0;
+        }
+
+        h1 { text-align: center; color: var(--primary); font-size: 2rem; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #64748b; margin-bottom: 30px; }
+
+        .identity-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+            background: #f1f5f9; padding: 20px; border-radius: 12px; margin-bottom: 30px;
+        }
+
+        .input-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.9rem; }
+        input[type="text"] {
+            width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px;
+            box-sizing: border-box; font-size: 1rem; transition: 0.3s;
+        }
+        input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+
+        .question-item { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #f1f5f9; }
+        .question-text { font-weight: 700; font-size: 1.05rem; display: block; margin-bottom: 15px; color: #334155; }
+        
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .option-card {
+            display: flex; align-items: center; padding: 12px 15px; border: 1.5px solid #e2e8f0;
+            border-radius: 10px; cursor: pointer; transition: all 0.2s ease;
+        }
+        .option-card:hover { border-color: var(--primary); background: #f5f3ff; }
+        input[type="radio"] { margin-right: 12px; width: 18px; height: 18px; accent-color: var(--primary); }
+
+        .btn {
+            background: var(--primary); color: white; border: none; padding: 16px;
+            border-radius: 12px; width: 100%; font-size: 1.1rem; font-weight: 700;
+            cursor: pointer; transition: 0.3s; margin-top: 10px;
+        }
+        .btn:hover { background: #4338ca; transform: translateY(-2px); }
+        .btn:disabled { background: #94a3b8; cursor: not-allowed; }
+
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #f8fafc; text-align: left; padding: 12px; color: #64748b; font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; }
+        td { padding: 15px 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
+        .rank { font-weight: 700; color: var(--primary); }
+        .score-badge { background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 99px; font-weight: 700; }
+
+        #result-section { display: none; text-align: center; }
+        .score-big { font-size: 4rem; font-weight: 800; color: var(--success); margin: 10px 0; }
+        
+        #loading-overlay { text-align: center; padding: 20px; color: var(--primary); font-weight: 600; }
+
+        .img-question { max-width: 100%; height: auto; margin: 10px 0; border-radius: 8px; }
+
+        @media (max-width: 600px) { .identity-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card" id="quiz-card">
+        <h1>Soal Matematika SMP Kelas 7</h1>
+        <p class="subtitle">Bilangan Bulat, Pecahan, dan Himpunan</p>
+
+        <div class="identity-grid">
+            <div class="input-group">
+                <label>Nama Lengkap</label>
+                <input type="text" id="nama" placeholder="Masukkan nama...">
+            </div>
+            <div class="input-group">
+                <label>Kelas</label>
+                <input type="text" id="kelas" placeholder="VII - ...">
+            </div>
+        </div>
+
+        <div id="quiz-container"></div>
+
+        <button class="btn" id="submit-btn" onclick="submitExam()">Kirim Semua Jawaban</button>
+    </div>
+
+    <div class="card" id="result-section">
+        <h2>Ujian Selesai!</h2>
+        <p id="student-res-info"></p>
+        <div class="score-big" id="final-score">0</div>
+        <p style="color: #64748b;">Data Anda telah tersimpan di Google Sheets.</p>
+        <button class="btn" onclick="location.reload()" style="background:#64748b;">Kerjakan Ulang</button>
+    </div>
+
+    <div class="card">
+        <h2 style="margin-top:0;">Papan Skor Live (Real-time)</h2>
+        <div id="loading-overlay">Menghubungkan ke database...</div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pos</th>
+                        <th>Nama Siswa</th>
+                        <th>Kelas</th>
+                        <th>Nilai</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzW9Qw0g-gfiCUisFkYslaY5zZX3LdIGvprAByAYf1EgW1X5gan3sPEJMBJB-nKNilw/exec';
+
+    const soalData = [
+        { q: "Hasil dari (-20) + 7 x 5 - 18 : (-3) adalah...", a: "-21", b: "-14", c: "21", d: "14", k: "c" },
+        { q: "Hasil dari -12 + 20 x 4 - (-6) : 3 = ...", a: "110", b: "70", c: "34", d: "30", k: "b" },
+        { q: "Bentuk sederhana dari (5³)² x (5⁴)⁵ adalah...", a: "5^15", b: "5^16", c: "5^18", d: "5^26", k: "d" },
+        { q: "Diketahui bilangan bulat -20, -35, 15, -13, 5, 10. Urutan bilangan bulat dari yang terbesar adalah....", a: "-35, -20, -13, 15, 10, 5", b: "15, 10, 5, -13, -20, -35", c: "-35, -20, 15, -13, 10, 5", d: "5, 10, -13, 15, -20, -35", k: "b" },
+        { q: "Suhu kota A 20°C. Suhu kota B 15°C lebih dingin dari kota A. Jika suhu kota C paling rendah serta selisih suhu kota B dan C 10°C, maka suhu kota C adalah...", a: "-5°C", b: "-15°C", c: "-20°C", d: "-25°C", k: "a" },
+        { q: "Pernyataan berikut ini yang BUKAN merupakan himpunan adalah ....", a: "Himpunan negara-negara ASEAN", b: "Kumpulan laki-laki tampan di kelas VII", c: "Kumpulan bunga berwarna merah", d: "Kumpulan perempuan tinggi diatas 155 cm", k: "b" },
+        { q: "Dalam kompetisi sepak bola, menang mendapat poin 3, kalah 0, dan seri 1. Jika tim menang 6 kali dan kalah 1 kali dari 10 pertandingan, maka poinnya adalah...", a: "12", b: "15", c: "21", d: "25", k: "c" },
+        { q: "M adalah himpunan bilangan asli kurang dari 15. Cara menuliskan dengan metode mendaftar anggotanya adalah...", a: "M = {1, 2, 3, ..., 14}", b: "M = {0, 1, 2, ..., 14}", c: "M = {x | x < 15, x bilangan asli}", d: "M = {x | x > 15, x bilangan asli}", k: "a" },
+        { q: "Himpunan P = {x | 2 ≤ x ≤ 8, x ∈ Bilangan Asli} jika dinyatakan dengan mendaftar anggotanya adalah...", a: "{3, 4, 5, 6, 7}", b: "{3, 4, 5, 6, 7, 8}", c: "{2, 3, 4, 5, 6, 7, 8}", d: "{2, 3, 4, 5, 6, 7}", k: "c" },
+        { q: "Perhatikan diagram Venn! Jika irisan A dan B (A ∩ B) dicari dari diagram dengan angka (1,6,7 di A; 4,5,8 di B; 2,3 di tengah), maka hasilnya adalah...", a: "{9}", b: "{2, 3}", c: "{1, 5, 7}", d: "{4, 6, 8}", k: "b" },
+        { q: "Himpunan semesta dari himpunan A = {0, 4, 8, 12, 16} adalah...", a: "Himpunan bilangan asli", b: "Himpunan bilangan ganjil", c: "Himpunan bilangan cacah", d: "Himpunan bilangan prima", k: "c" },
+        { q: "Pecahan berikut, manakah pecahan paling kecil?", a: "1/4", b: "1/9", c: "1/12", d: "2/3", k: "c" },
+        { q: "Hasil dari 2 2/3 - 2 5/12 + 2 1/4 = ...", a: "3/4", b: "4/12", c: "5/2", d: "2/5", k: "c" },
+        { q: "Ani membagikan 30 kg gula pasir. Tiap keluarga mendapat 1 1/2 kg. Banyak kepala keluarga yang menerima adalah...", a: "20", b: "30", c: "45", d: "60", k: "a" },
+        { q: "Hitunglah: (-2)³ + (-3)² = ....", a: "1", b: "-1", c: "2", d: "-2", k: "a" },
+        { q: "Bentuk notasi eksponensial dari (-2)x(-2)x3x3x(-4)x(-4)x(-4) adalah...", a: "(-2)² x 3² x (-4)³", b: "-2² x 3² x -4³", c: "(-2)² x 3³ x (-4)³", d: "(-2)³ x 3² x (-4)³", k: "a" },
+        { q: "Hasil dari 4 3/5 - 3/4 + 5/8 = ...", a: "3 9/40", b: "4 9/40", c: "4 19/40", d: "5 39/40", k: "c" },
+        { q: "Urutan pecahan dari yang paling kecil: 20/100; 3/6; 6,7; 7/12; 2/8 adalah...", a: "20/100; 3/6; 7/12; 2/8", b: "2/8; 20/100; 3/6; 7/12", c: "3/6; 20/100; 7/12; 2/8", d: "7/12; 20/100; 3/6; 2/8", k: "b" },
+        { q: "Perhatikan diagram Venn! Hasil dari A - B (anggota A yang bukan anggota B) adalah...", a: "{b}", b: "{a, e}", c: "{c, f}", d: "{b, c, f}", k: "b" },
+        { q: "Dari 42 siswa, 24 ikut Pramuka, 17 ikut PMR, dan 8 tidak ikut keduanya. Banyak siswa yang ikut keduanya adalah...", a: "1 orang", b: "7 orang", c: "9 orang", d: "41 orang", k: "b" }
+    ];
+
+    // Injek Soal ke HTML
+    const quizDiv = document.getElementById('quiz-container');
+    soalData.forEach((item, idx) => {
+        quizDiv.innerHTML += `
+            <div class="question-item">
+                <span class="question-text">${idx+1}. ${item.q}</span>
+                <div class="options-grid">
+                    <label class="option-card"><input type="radio" name="q${idx}" value="a"> A. ${item.a}</label>
+                    <label class="option-card"><input type="radio" name="q${idx}" value="b"> B. ${item.b}</label>
+                    <label class="option-card"><input type="radio" name="q${idx}" value="c"> C. ${item.c}</label>
+                    <label class="option-card"><input type="radio" name="q${idx}" value="d"> D. ${item.d}</label>
+                </div>
+            </div>
+        `;
+    });
+
+    async function loadLeaderboard() {
+        try {
+            const res = await fetch(SCRIPT_URL);
+            const data = await res.json();
+            data.sort((a, b) => b.skor - a.skor);
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = '';
+            data.forEach((row, i) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="rank">#${i + 1}</td>
+                        <td><strong>${row.nama}</strong></td>
+                        <td>${row.kelas}</td>
+                        <td><span class="score-badge">${row.skor}</span></td>
+                    </tr>
+                `;
+            });
+            document.getElementById('loading-overlay').style.display = 'none';
+        } catch (err) {
+            document.getElementById('loading-overlay').innerText = "Gagal memuat data.";
+        }
+    }
+
+    async function submitExam() {
+        const nama = document.getElementById('nama').value;
+        const kelas = document.getElementById('kelas').value;
+        const btn = document.getElementById('submit-btn');
+
+        if(!nama || !kelas) {
+            alert("⚠️ Masukkan Nama dan Kelas!");
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = "Mengirim Nilai...";
+
+        let benar = 0;
+        soalData.forEach((item, idx) => {
+            const selected = document.querySelector(`input[name="q${idx}"]:checked`);
+            if(selected && selected.value === item.k) benar++;
+        });
+
+        const skorFinal = Math.round((benar / soalData.length) * 100);
+
+        try {
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nama, kelas, skor: skorFinal })
+            });
+
+            document.getElementById('quiz-card').style.display = 'none';
+            document.getElementById('result-section').style.display = 'block';
+            document.getElementById('student-res-info').innerText = `${nama} - ${kelas}`;
+            document.getElementById('final-score').innerText = skorFinal;
+            loadLeaderboard();
+        } catch (e) {
+            alert("Error: " + e.message);
+            btn.disabled = false;
+        }
+    }
+
+    window.onload = loadLeaderboard;
+</script>
+
+</body>
+</html>
