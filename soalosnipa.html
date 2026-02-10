@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Quiz IPA Kelas 7</title>
+    <title>E-Quiz OSNK IPA 2024</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -35,7 +35,7 @@
             border: 1px solid #e2e8f0;
         }
 
-        h1 { text-align: center; color: var(--primary); font-size: 2rem; margin-bottom: 10px; }
+        h1 { text-align: center; color: var(--primary); font-size: 1.8rem; margin-bottom: 10px; }
         .subtitle { text-align: center; color: #64748b; margin-bottom: 30px; }
 
         .identity-grid {
@@ -51,7 +51,7 @@
         input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
 
         .question-item { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #f1f5f9; }
-        .question-text { font-weight: 700; font-size: 1.05rem; display: block; margin-bottom: 15px; color: #334155; }
+        .question-text { font-weight: 700; font-size: 1.05rem; display: block; margin-bottom: 15px; color: #334155; white-space: pre-line; }
         
         .options-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
         .option-card {
@@ -81,6 +81,8 @@
         
         #loading-overlay { text-align: center; padding: 20px; color: var(--primary); font-weight: 600; }
 
+        .type-header { background: #fee2e2; color: #991b1b; padding: 10px; border-radius: 8px; font-weight: bold; margin-bottom: 20px; text-align: center; }
+
         @media (max-width: 600px) { .identity-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -88,8 +90,8 @@
 
 <div class="container">
     <div class="card" id="quiz-card">
-        <h1>Soal IPA SMP Kelas 7</h1>
-        <p class="subtitle">Besaran, Satuan, dan Pengukuran</p>
+        <h1>OLIMPIADE SAINS NASIONAL (OSNK)</h1>
+        <p class="subtitle">Bidang IPA Tahun 2024 - Jenjang SMP/MTS</p>
 
         <div class="identity-grid">
             <div class="input-group">
@@ -97,8 +99,8 @@
                 <input type="text" id="nama" placeholder="Masukkan nama...">
             </div>
             <div class="input-group">
-                <label>Kelas</label>
-                <input type="text" id="kelas" placeholder="VII - ...">
+                <label>Asal Sekolah</label>
+                <input type="text" id="kelas" placeholder="SMP ...">
             </div>
         </div>
 
@@ -111,12 +113,12 @@
         <h2>Ujian Selesai!</h2>
         <p id="student-res-info"></p>
         <div class="score-big" id="final-score">0</div>
-        <p style="color: #64748b;">Data Anda telah tersimpan di Google Sheets.</p>
+        <p style="color: #64748b;">Terima kasih telah mengikuti simulasi OSNK IPA 2024.</p>
         <button class="btn" onclick="location.reload()" style="background:#64748b;">Kerjakan Ulang</button>
     </div>
 
     <div class="card">
-        <h2 style="margin-top:0;">Papan Skor Live (Real-time)</h2>
+        <h2 style="margin-top:0;">Papan Skor Live</h2>
         <div id="loading-overlay">Menghubungkan ke database...</div>
         <div class="table-container">
             <table>
@@ -124,7 +126,7 @@
                     <tr>
                         <th>Pos</th>
                         <th>Nama Siswa</th>
-                        <th>Kelas</th>
+                        <th>Sekolah</th>
                         <th>Nilai</th>
                     </tr>
                 </thead>
@@ -138,22 +140,53 @@
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyDbHDcug-AvCs7fvLyE61h5mU3BUzQpy12DPdID-uaNibolcDfyHFY8yH4scrtS8Dd/exec';
 
     const soalData = [
-        { q: "Secara umum, besaran dibagi kedalam dua kelompok, yaitu ...", a: "Besaran pokok dan turunan", b: "Besaran turunan dan besaran murni", c: "Besaran nasional dan internasional", d: "Besaran pokok dan besaran nasional", k: "a" },
-        { q: "Dahulu, orang-orang memakai anggota tubuh mereka sebagai satuan pengukuran, seperti, kecuali ...", a: "Jari, hasta, kaki", b: "Jengkal, depa, langkah", c: "Meter, gram, liter", d: "Kaki, jengkal, langkah", k: "c" },
-        { q: "Ukuran yang bisa diukur serta mempunyai satu unit disebut dengan ukuran", a: "Biologi", b: "Kimia", c: "Fisika", d: "Matematika", k: "c" },
-        { q: "Di bawah ini yang termasuk kedalam jenis besaran pokok yaitu ....", a: "massa, kecepatan, waktu", b: "panjang, massa, waktu", c: "panjang, volume, massa", d: "suhu, panjang, berat", k: "b" },
-        { q: "Alat ukur panjang dengan tingkat ketelitian 0,01 mm yaitu ....", a: "mistar", b: "rol meter", c: "jangka sorong", d: "mikrometer sekrup", k: "d" },
-        { q: "Pengukuran adalah sebuah aktivitas membandingkan suatu besaran yang diukur menggunakan alat ukur yang nantinya akan digunakan sebagai ...", a: "besaran pokok", b: "satuan", c: "besaran turunan", d: "besaran skalar", k: "b" },
-        { q: "Sebuah meja memiliki panjang 1 meter. Satuan besaran yang dipakai dari pernyataan tersebut yaitu", a: "panjang", b: "1 meter", c: "meter", d: "meja", k: "c" },
-        { q: "Alat yang dipakai untuk mengukur suhu yaitu ....", a: "Roll Meter", b: "Termometer", c: "Barometer", d: "Neraca Pegas", k: "b" },
-        { q: "Satuan SI yang digunakan untuk menyatakan panjang yaitu", a: "depa", b: "kilogram", c: "meter", d: "kubik", k: "c" },
-        { q: "Ampere merupakan satuan SI untuk menyatakan ....", a: "Panjang", b: "Massa", c: "Waktu", d: "Kuat arus listrik", k: "d" }
-    ];
+        // TIPE-1 (Pilihan Ganda Biasa)
+        { q: "Berdasarkan hasil percobaan osmosis pada kentang, larutan yang hipertonis adalah larutan...", a: "I dan II", b: "II dan III", c: "III dan V", d: "IV dan I", k: "d" },
+        { q: "Pernikahan antara wanita dan pria normal melahirkan anak laki-laki buta warna dan dua anak perempuan normal. Hal ini menunjukkan bahwa...", a: "Ayah adalah homozigot dominan", b: "Ibu adalah homozigot resesif", c: "Ibu adalah carrier", d: "Ayah adalah carrier", k: "c" },
+        { q: "Lensa mata pasien tidak rata sehingga sinar tidak dibiaskan dengan kekuatan yang sama. Kelainan yang diperbaiki dengan lensa silindris ini disebut...", a: "Miopi", b: "Hipermetropi", c: "Astigmatisma", d: "Presbiopi", k: "c" },
+        { q: "Makhluk hidup yang memakan produsen merupakan konsumen tingkat ke- dan menduduki tingkat tropik ke-...", a: "Satu; Satu", b: "Satu; Dua", c: "Dua; Satu", d: "Dua; Dua", k: "b" },
+        { q: "Kingdom berikut ini yang selnya tidak memiliki dinding sel adalah...", a: "Fungi", b: "Bakteri", c: "Tumbuhan", d: "Protista", k: "d" },
+        { q: "Keanekaragaman hayati tinggi di daerah tropis disebabkan faktor berikut, KECUALI...", a: "Curah hujan tinggi", b: "Suhu hangat", c: "Perbedaan suhu relatif tinggi", d: "Cahaya matahari sepanjang tahun", k: "c" },
+        { q: "Organel sel yang berperan untuk mendetoksifikasi racun adalah...", a: "Lisosom", b: "Mitokondria", c: "Peroksisom", d: "Badan Golgi", k: "c" },
+        { q: "Urutan lapisan kulit yang berfungsi sebagai penghasil protein keratin dan sel melanosit adalah...", a: "1 dan 2 (Lusidum & Granulosum)", b: "2 dan 3 (Granulosum & Germinativum)", c: "2 dan 4 (Granulosum & Korneum)", d: "3 dan 4 (Germinativum & Korneum)", k: "b" },
+        { q: "Ani minum 300 mL/hari, Eni minum 2 liter/hari. Perbedaan urin mereka adalah...", a: "Ani banyak & pekat; Eni banyak & pucat", b: "Eni banyak & pucat; Ani sedikit & pekat", c: "Ani sedikit & pekat; Eni sedikit & pucat", d: "Eni sedikit & pucat; Ani banyak & pucat", k: "b" },
+        { q: "Mekanisme denyut jantung kembali normal setelah olahraga dimungkinkan karena adanya...", a: "Saraf simpatik", b: "Saraf parasimpatik", c: "Sumsum lanjutan", d: "Sumsum tulang belakang", k: "b" },
+        { q: "Zat titik beku 4°C dan titik uap 80°C. Pada suhu ruang (25°C) zat cair memiliki sifat...", a: "Susunan molekul tidak teratur", b: "Gerak molekul tidak bebas", c: "Letak molekul sangat berdekatan", d: "Gaya tarik antar molekul sangat lemah", k: "a" },
+        { q: "Berdasarkan grafik kecepatan, benda bergerak diperlambat pada lintasan...", a: "OP dan TU", b: "QR dan TU", c: "OP, QS dan TU", d: "QS", k: "b" },
+        { q: "Termometer T: titik bawah 10°T. Air 50°C terukur 50°T. Maka air mendidih pada suhu...", a: "110 °T", b: "100 °T", c: "90 °T", d: "80 °T", k: "c" },
+        { q: "Mesin tarik balok 100kg, gaya gesek 30N, pindah 1m, kec 0.2m/s. Usaha mesin adalah...", a: "230 J", b: "50 J", c: "32 J", d: "2 J", k: "c" },
+        { q: "Kawat PQ 20cm, v=10m/s, B=0.05T, R=0.01 ohm. Besar dan arah arus induksi adalah...", a: "5A dari P ke Q", b: "5A dari Q ke P", c: "10A dari P ke Q", d: "10A dari Q ke P", k: "d" },
+        { q: "Bola konduktor r=8cm, q=8e-11 C. Potensial titik berjarak 5cm dari pusat adalah...", a: "6.0 V", b: "7.5 V", c: "9.0 V", d: "14.5 V", k: "c" },
+        { q: "Pipa U: Air (1g/cc) & Minyak (0.9g/cc). Tinggi minyak 20cm. Selisih tinggi kolom adalah...", a: "15 mm", b: "18 mm", c: "20 mm", d: "27 mm", k: "c" },
+        { q: "Bola 100cc, 3/4 di air. Ditekan sampai tenggelam semua. Gaya tekan yang dibutuhkan (g=10)...", a: "0.75 N", b: "0.25 N", c: "0.075 N", d: "0.025 N", k: "b" },
+        { q: "Pegas frekuensi (10√5)/π Hz, g=10. Pertambahan panjang L adalah...", a: "1.3 cm", b: "1.0 cm", c: "0.8 cm", d: "0.5 cm", k: "d" },
+        { q: "Lampu 60W/220V dipasang pada 110V. Daya listrik menjadi...", a: "60 W", b: "30 W", c: "20 W", d: "15 W", k: "d" },
 
-    // Injek Soal ke HTML
+        // TIPE-2 (Logika 1,2,3,4)
+        { q: "Manakah yang merupakan proses katabolisme?\n1. Gliserol & lemak jadi lipid\n2. Glukosa jadi CO2 & H2O\n3. ATP jadi ADP", a: "1,2,3", b: "1,2", c: "2,3", d: "1,3", k: "c" },
+        { q: "Alat untuk mengetahui transpirasi melalui stomata dan kutikula adalah...", a: "1,2,3 (Respirometer, timbangan, kertas kobalt)", b: "1,2,4", c: "2,3 (Timbangan, kertas kobalt)", d: "1,4", k: "c" },
+        { q: "Interaksi yang memberikan keuntungan minimal (hanya satu pihak untung atau nol) adalah...", a: "1,2 (Amensalisme, Kompetisi)", b: "2,4", c: "1,3 (Amensalisme, Parasitisme)", d: "3,4", k: "c" },
+        { q: "Hewan mangrove: 1.Keong, 2.Kerang, 3.Ikan, 4.Kepiting. Yang paling dekat kekerabatannya...", a: "1,2 (Mollusca)", b: "1,2,3", c: "3,4", d: "2,4", k: "a" },
+        { q: "Zat yang mengalami pencernaan kimia: 1.Amilum, 2.Protein, 3.Glukosa, 4.Lemak, 5.Asam amino", a: "1, 2, 3", b: "2, 3, 4", c: "1, 2, 4", d: "3, 4, 5", k: "c" },
+        { q: "Benda jatuh bebas m=20g, h=8m. Setelah 1 sekon:\n1. Ek < Ep\n2. Ep jadi 5/8\n3. h = 5m\n4. v = 10m/s", a: "1 dan 4", b: "1, 2 dan 4", c: "1, 2, 3 dan 4", d: "4 saja", k: "c" },
+        { q: "Perubahan kimia ditunjukkan nomor:\n1.Fotosintesis, 2.Tapai, 3.Besi Karat, 4.Beras jadi nasi", a: "1 dan 3", b: "2 dan 4", c: "1, 2, dan 3", d: "1, 2, 3 dan 4", k: "c" },
+        { q: "Pernyataan benar tentang sumber bunyi:\n1.Pancaran bola\n2.Jarak x4 -> Intensitas 1/2\n3.Rasio intensitas 1m:2m = 4:1\n4.Jarak x4 -> Energi 1/4", a: "1,2,3", b: "1,3", c: "2,4", d: "4 saja", k: "b" },
+        { q: "Cermin konvergen f=20cm, benda v=10cm/s mendekat. t=0, s=60cm.\n1.Bayangan mendekat\n2.t=0 bayangan 30cm depan cermin\n3.t<4 bayangan nyata\n4.t>4 bayangan maya", a: "1, 2, dan 3", b: "1 dan 3", c: "2 dan 4", d: "1, 2, 3, dan 4", k: "d" },
+        { q: "Pegas mendatar k=40, ditarik 1cm lalu lepas. Berhenti di titik seimbang.\n1.Mekanik berkurang\n2.Gaya gesek 0.2N\n3.Usaha gesek = Ep max\n4.Usaha gesek 0.001 J", a: "1, 2, dan 3", b: "1 dan 3", c: "2 dan 4", d: "1, 2, 3, dan 4", k: "a" },
+
+        // TIPE-3 (Sebab Akibat)
+        { q: "Pernyataan: Perpindahan air tanah ke akar karena perbedaan konsentrasi.\nSebab: Itu adalah proses difusi.", a: "A (Benar, Benar, Berhubungan)", b: "B (Benar, Benar, Tidak Berhubungan)", c: "C (Salah satu benar)", d: "D (Keduanya salah)", k: "c" },
+        ];
+
     const quizDiv = document.getElementById('quiz-container');
     soalData.forEach((item, idx) => {
+        let header = "";
+        if(idx === 0) header = `<div class="type-header">TIPE 1: PILIHAN GANDA</div>`;
+        if(idx === 20) header = `<div class="type-header">TIPE 2: PILIHAN GANDA KOMPLEKS</div>`;
+        if(idx === 30) header = `<div class="type-header">TIPE 3: SEBAB AKIBAT</div>`;
+
         quizDiv.innerHTML += `
+            ${header}
             <div class="question-item">
                 <span class="question-text">${idx+1}. ${item.q}</span>
                 <div class="options-grid">
@@ -173,7 +206,7 @@
             data.sort((a, b) => b.skor - a.skor);
             const tbody = document.getElementById('leaderboard-body');
             tbody.innerHTML = '';
-            data.forEach((row, i) => {
+            data.slice(0, 10).forEach((row, i) => {
                 tbody.innerHTML += `
                     <tr>
                         <td class="rank">#${i + 1}</td>
@@ -185,7 +218,7 @@
             });
             document.getElementById('loading-overlay').style.display = 'none';
         } catch (err) {
-            document.getElementById('loading-overlay').innerText = "Gagal memuat data.";
+            document.getElementById('loading-overlay').innerText = "Database offline.";
         }
     }
 
@@ -195,12 +228,12 @@
         const btn = document.getElementById('submit-btn');
 
         if(!nama || !kelas) {
-            alert("⚠️ Masukkan Nama dan Kelas!");
+            alert("⚠️ Lengkapi Nama dan Asal Sekolah!");
             return;
         }
 
         btn.disabled = true;
-        btn.innerText = "Mengirim Nilai...";
+        btn.innerText = "Mengirim...";
 
         let benar = 0;
         soalData.forEach((item, idx) => {
@@ -208,7 +241,7 @@
             if(selected && selected.value === item.k) benar++;
         });
 
-        const skorFinal = (benar / soalData.length) * 100;
+        const skorFinal = Math.round((benar / soalData.length) * 100);
 
         try {
             await fetch(SCRIPT_URL, {
@@ -220,11 +253,12 @@
 
             document.getElementById('quiz-card').style.display = 'none';
             document.getElementById('result-section').style.display = 'block';
-            document.getElementById('student-res-info').innerText = `${nama} - ${kelas}`;
+            document.getElementById('student-res-info').innerText = `${nama} (${kelas})`;
             document.getElementById('final-score').innerText = skorFinal;
+            window.scrollTo(0,0);
             loadLeaderboard();
         } catch (e) {
-            alert("Error: " + e.message);
+            alert("Terjadi kesalahan teknis.");
             btn.disabled = false;
         }
     }
